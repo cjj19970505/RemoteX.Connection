@@ -7,15 +7,17 @@ namespace RemoteX.Connection.Rfcomm
 {
     public class RfcommRXConnectionGroup : IRXConnectionGroup
     {
-        public IRXListener Listener => throw new NotImplementedException();
+        public IRXListener Listener { get; }
 
-        public IRXScanner Scanner => throw new NotImplementedException();
+        public IRXScanner Scanner { get; }
 
         public IBluetoothManager BluetoothManager { get; }
 
         public RfcommRXConnectionGroup(IBluetoothManager bluetoothManager)
         {
             BluetoothManager = bluetoothManager;
+            Listener = new RfcommAdvertiseRXListener(this);
+            
         }
     }
 }

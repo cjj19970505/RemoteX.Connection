@@ -8,6 +8,7 @@ namespace RemoteX.RXConnExplorer.Models
     {
         Browse,
         About,
+        RXConn,
         RfcommSetting
     }
     public class HomeMenuItem

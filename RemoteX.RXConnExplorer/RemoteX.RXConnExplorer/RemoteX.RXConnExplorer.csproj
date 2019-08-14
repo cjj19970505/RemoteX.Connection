@@ -11,16 +11,20 @@
 
   <ItemGroup>
     <PackageReference Include="RemoteX.Bluetooth" Version="1.0.2" />
-    <PackageReference Include="Xamarin.Forms" Version="4.1.0.555618" />  
-    <PackageReference Include="Xamarin.Essentials" Version="1.1.0" />
+    <PackageReference Include="Xamarin.Forms" Version="4.1.0.673156" />  
+    <PackageReference Include="Xamarin.Essentials" Version="1.2.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\RemoteX.Connection.Rfcomm\RemoteX.Connection.Rfcomm.csproj" />
     <ProjectReference Include="..\..\RemoteX.Connection\RemoteX.Connection.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="Rfcomm\Views\RfcommSettingPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\RXConnPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>

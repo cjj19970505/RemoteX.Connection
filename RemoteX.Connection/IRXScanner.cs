@@ -6,6 +6,8 @@ namespace RemoteX.Connection
 {
     public interface IRXScanner
     {
-        
+        event EventHandler<IRXConnection> OnConnectionReceived;
+
+        void Start();
     }
 }

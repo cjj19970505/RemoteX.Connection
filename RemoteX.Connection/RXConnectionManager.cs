@@ -7,7 +7,6 @@ namespace RemoteX.Connection
 {
     public class RXConnectionManager
     {
-        public event EventHandler Connected;
         List<IRXConnectionGroup> _RXConnectionGroupList;
         List<IRXConnection> _RXConnectionList;
 
@@ -27,21 +26,33 @@ namespace RemoteX.Connection
             foreach(var connectionGroup in _RXConnectionGroupList)
             {
                 connectionGroup.Listener.ConnectionReceived += Listener_ConnectionReceived;
+                connectionGroup.Listener.Start();
             }
         }
 
-        private void Listener_ConnectionReceived(object sender, IRXConnection e)
+        public void StartScan()
+        {
+            foreach(var connectionGroup in _RXConnectionGroupList)
+            {
+                connectionGroup.Scanner.Start();
+                connectionGroup.Scanner.OnConnectionReceived += Scanner_OnConnectionReceived;
+            }
+        }
+
+        private async void Scanner_OnConnectionReceived(object sender, IRXConnection e)
         {
             _RXConnectionList.Add(e);
-            if(_RXConnectionList.Count == 1)
-            {
-                Connected?.Invoke(this, null);
-            }
+            await e.ConnectAsync();
+        }
+
+        private async void Listener_ConnectionReceived(object sender, IRXConnection e)
+        {
+            _RXConnectionList.Add(e);
+            await e.ConnectAsync();
         }
 
         public async Task SendAsync(int channelCode, byte[] sendBytes)
         {
-            
             var rxConnection = _SelectConnection(channelCode);
             await rxConnection.SendAsync(sendBytes);
         }

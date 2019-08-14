@@ -40,6 +40,9 @@ namespace RemoteX.RXConnExplorer.Views
                     case (int)MenuItemType.RfcommSetting:
                         MenuPages.Add(id, new NavigationPage(new RfcommSettingPage()));
                         break;
+                    case (int)MenuItemType.RXConn:
+                        MenuPages.Add(id, new NavigationPage(new RXConnPage()));
+                        break;
                 }
             }
 

@@ -31,7 +31,17 @@ namespace RemoteX.RXConnExplorer.UWP
                 return _BluetoothManager;
             }
         }
-        public RXConnectionManager RXConnectionManager { get; internal set; }
+        public RXConnectionManager RXConnectionManager
+        {
+            get
+            {
+                if(_RXConnectionManager == null)
+                {
+                    _RXConnectionManager = new RXConnectionManager();
+                }
+                return _RXConnectionManager;
+            }
+        }
 
         
     }

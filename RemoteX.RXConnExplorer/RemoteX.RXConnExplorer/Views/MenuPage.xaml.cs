@@ -22,7 +22,8 @@ namespace RemoteX.RXConnExplorer.Views
             {
                 new HomeMenuItem {Id = MenuItemType.Browse, Title="Browse" },
                 new HomeMenuItem {Id = MenuItemType.About, Title="About" },
-                new HomeMenuItem{Id=MenuItemType.RfcommSetting, Title="Rfcomm Setting"}
+                new HomeMenuItem{Id=MenuItemType.RfcommSetting, Title="Rfcomm Setting"},
+                new HomeMenuItem{Id=MenuItemType.RXConn, Title="RXConn"}
             };
 
             ListViewMenu.ItemsSource = menuItems;
