@@ -15,6 +15,7 @@ namespace RemoteX.Connection
         /// </summary>
         RXConnectionState ConnectionState { get; }
         event EventHandler<RXConnectionState> OnConnectionStateChanged;
+        event EventHandler<RXMessage> OnReceived;
         Task SendAsync(byte[] sendBytes);
         Task ConnectAsync();
     }

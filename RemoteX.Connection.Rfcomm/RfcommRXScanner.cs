@@ -20,12 +20,23 @@ namespace RemoteX.Connection.Rfcomm
         {
             if(e.Address == BluetoothUtils.AddressStringToInt64("DC:53:60:DD:AE:63"))
             {
-                ConnectionGroup.BluetoothManager.LEScanner.Stop();
-                var serviceResult = await e.GetRfcommServicesForIdAsync(Constants.ServiceId);
+                ConnectionGroup.BluetoothManager.RfcommScanner.Stop();
+
+                //var serviceResult = await e.GetRfcommServicesAsync();
+                await e.RfcommConnectAsync();
+                //var serviceResult = await e.GetRfcommServicesForIdAsync(Constants.ServiceId);
+                var serviceResult = await e.GetRfcommServicesAsync();
+
                 IRfcommDeviceService service = null;
                 if(serviceResult.Error == BluetoothError.Success && serviceResult.Services.Count > 0)
                 {
-                    service = serviceResult.Services[0];
+                    foreach(var ser in serviceResult.Services)
+                    {
+                        if(ser.ServiceId == Constants.ServiceId)
+                        {
+                            service = ser;
+                        }
+                    }
                 }
                 if(service == null)
                 {

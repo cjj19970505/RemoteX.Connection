@@ -17,6 +17,7 @@ namespace RemoteX.Connection.Rfcomm
         {
             BluetoothManager = bluetoothManager;
             Listener = new RfcommAdvertiseRXListener(this);
+            Scanner = new RfcommRXScanner(this);
             
         }
     }

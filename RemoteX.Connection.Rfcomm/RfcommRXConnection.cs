@@ -20,6 +20,8 @@ namespace RemoteX.Connection.Rfcomm
         /// </summary>
         public IRfcommConnection RfcommConnection { get; private set; }
 
+        Task _ReadInputStreamTask;
+
         /// <summary>
         /// 这个构造器是Client用的
         /// </summary>
@@ -42,6 +44,7 @@ namespace RemoteX.Connection.Rfcomm
         }
 
         public event EventHandler<RXConnectionState> OnConnectionStateChanged;
+        public event EventHandler<RXMessage> OnReceived;
 
         public async Task ConnectAsync()
         {
@@ -53,6 +56,8 @@ namespace RemoteX.Connection.Rfcomm
                 try
                 {
                     await DeviceService.ConnectAsync();
+                    RfcommConnection = DeviceService.RfcommConnection;
+                    _ReadInputStreamTask = _ReadInputStreamTaskAsync();
                     ConnectionState = RXConnectionState.Connected;
                     OnConnectionStateChanged?.Invoke(this, ConnectionState);
 
@@ -68,13 +73,40 @@ namespace RemoteX.Connection.Rfcomm
             {
                 /*Host is Server*/
                 ConnectionState = RXConnectionState.Connected;
+                _ReadInputStreamTask = _ReadInputStreamTaskAsync();
                 OnConnectionStateChanged?.Invoke(this, ConnectionState);
             }
         }
 
-        public Task SendAsync(byte[] sendBytes)
+        private Task _ReadInputStreamTaskAsync()
         {
-            throw new NotImplementedException();
+            return Task.Run(() =>
+            {
+                
+                var inputStream = RfcommConnection.InputStream;
+                while (true)
+                {
+                    byte[] buffer = new byte[255];
+                    try
+                    {
+                        var readSize = inputStream.Read(buffer, 0, buffer.Length);
+                        var readBytes = new byte[readSize];
+                        Array.Copy(buffer, 0, readBytes, 0, readSize);
+                        var msg = new RXMessage { Bytes = readBytes };
+                        OnReceived?.Invoke(this, msg);
+                    }
+                    catch(Exception e)
+                    {
+                        System.Diagnostics.Debug.WriteLine("fuck");
+                    }
+                }
+            });
+        }
+
+        public async Task SendAsync(byte[] sendBytes)
+        {
+            await RfcommConnection.OutputStream.WriteAsync(sendBytes, 0, sendBytes.Length);
+            await RfcommConnection.OutputStream.FlushAsync();
         }
     }
 }

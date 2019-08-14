@@ -9,7 +9,8 @@ namespace RemoteX.Connection
     {
         List<IRXConnectionGroup> _RXConnectionGroupList;
         List<IRXConnection> _RXConnectionList;
-
+        public event EventHandler<RXMessage> OnReceived;
+        
         public RXConnectionManager()
         {
             _RXConnectionGroupList = new List<IRXConnectionGroup>();
@@ -42,22 +43,37 @@ namespace RemoteX.Connection
         private async void Scanner_OnConnectionReceived(object sender, IRXConnection e)
         {
             _RXConnectionList.Add(e);
+            var connection = e;
+            connection.OnReceived += Connection_OnReceived;
+            connection.OnConnectionStateChanged += Connection_OnConnectionStateChanged;
             await e.ConnectAsync();
         }
-
         private async void Listener_ConnectionReceived(object sender, IRXConnection e)
         {
             _RXConnectionList.Add(e);
+            var connection = e;
+            connection.OnReceived += Connection_OnReceived;
+            connection.OnConnectionStateChanged += Connection_OnConnectionStateChanged;
             await e.ConnectAsync();
         }
 
-        public async Task SendAsync(int channelCode, byte[] sendBytes)
+        private void Connection_OnConnectionStateChanged(object sender, RXConnectionState e)
         {
-            var rxConnection = _SelectConnection(channelCode);
-            await rxConnection.SendAsync(sendBytes);
+            
         }
 
-        public IRXConnection _SelectConnection(int channelCode)
+        
+        private void Connection_OnReceived(object sender, RXMessage e)
+        {
+            OnReceived?.Invoke(this, e);
+        }
+        public async Task SendAsync(RXMessage rxMessage)
+        {
+            var rxConnection = _SelectConnection(rxMessage);
+            await rxConnection.SendAsync(rxMessage.Bytes);
+        }
+
+        public IRXConnection _SelectConnection(RXMessage message)
         {
             return _RXConnectionList[0];
         }

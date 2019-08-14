@@ -6,13 +6,29 @@
              mc:Ignorable="d"
              x:Class="RemoteX.RXConnExplorer.Views.RXConnPage">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-            <Button x:Name="StartAdvertiseButton" Text="Advertise" Clicked="StartAdvertiseButton_Clicked"/>
-            <Button x:Name="StartScanButton" Text="Scan" Clicked="StartScanButton_Clicked"/>
-            
-        </StackLayout>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="9*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="StartAdvertiseButton" Grid.Column="0" Text="Advertise" Clicked="StartAdvertiseButton_Clicked"/>
+                <Button x:Name="StartScanButton" Grid.Column="1" Text="Scan" Clicked="StartScanButton_Clicked"/>
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.9*"/>
+                    <ColumnDefinition Width="0.1*"/>
+                </Grid.ColumnDefinitions>
+                <Entry Grid.Column="0" x:Name="SendEntry"/>
+                <Button Grid.Column="1" x:Name="SendButton" Clicked="SendButton_Clicked"/>
+            </Grid>
+            <ListView Grid.Row="2" x:Name="ReceiveListView"/>
+        </Grid>
     </ContentPage.Content>
 </ContentPage>

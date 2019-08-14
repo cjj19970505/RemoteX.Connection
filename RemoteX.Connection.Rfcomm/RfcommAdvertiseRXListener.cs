@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace RemoteX.Connection.Rfcomm
 {
@@ -10,15 +11,20 @@ namespace RemoteX.Connection.Rfcomm
     {
         public event EventHandler<IRXConnection> ConnectionReceived;
         public IRXConnectionGroup ConnectionGroup { get; }
-        public IRfcommServiceProvider ServiceProvier { get; }
+        public IRfcommServiceProvider ServiceProvier { get; private set; }
 
         internal RfcommAdvertiseRXListener(RfcommRXConnectionGroup rfcommConnectionGroup)
         {
             ConnectionGroup = rfcommConnectionGroup;
-            var createProviderTask = (ConnectionGroup as RfcommRXConnectionGroup).BluetoothManager.CreateRfcommServiceProviderAsync(Constants.ServiceId);
-            createProviderTask.Wait();
-            ServiceProvier = createProviderTask.Result;
-            ServiceProvier.OnConnectionReceived += ServiceProvier_OnConnectionReceived;
+            Task.Run(async() =>
+            {
+                ServiceProvier = await (ConnectionGroup as RfcommRXConnectionGroup).BluetoothManager.CreateRfcommServiceProviderAsync(Constants.ServiceId);
+                System.Diagnostics.Debug.WriteLine("ServiceProvider");
+                ServiceProvier.OnConnectionReceived += ServiceProvier_OnConnectionReceived;
+                
+            });
+            
+            
         }
 
         public void Start()
