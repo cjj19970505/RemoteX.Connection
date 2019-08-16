@@ -7,10 +7,14 @@
              x:Class="RemoteX.RXConnExplorer.Attribute.AttClientPage">
     <ContentPage.Content>
         <StackLayout>
+            <Button x:Name="FetchButton" Text="Fetch" Clicked="FetchButton_Clicked"/>
             <StackLayout BindingContext="{Binding Path=RemoteRXDevice}">
                 <Label Text="{Binding Path=DeviceName}"/>
                 <Label Text="{Binding Path=DeviceId, Converter={StaticResource GuidToStringConverter}}"/>
             </StackLayout>
+            <ListView x:Name="AttributeItemListView">
+                
+            </ListView>
             
         </StackLayout>
     </ContentPage.Content>

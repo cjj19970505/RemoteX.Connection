@@ -3,23 +3,27 @@ using RemoteX.Bluetooth.Rfcomm;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace RemoteX.Connection.Rfcomm
 {
-    public class RfcommRXScanner : IRXScanner
+    /// <summary>
+    /// This scanner read from attribute and establish a link
+    /// </summary>
+    public class RfcommFromAttRXScanner : IRXScanner
     {
-        public event EventHandler<IRXConnection> OnConnectionReceived;
         public IRXConnectionGroup ConnectionGroup { get; }
 
         public RXScannerStatus Status { get; private set; }
 
-        private bool _StopCall = false;
-        public RfcommRXScanner(RfcommRXConnectionGroup connectionGroup)
+        public event EventHandler<IRXConnection> OnConnectionReceived;
+        private UInt64 TargetMacAddress = 0;
+        
+        public RfcommFromAttRXScanner(IRXConnectionGroup connectionGroup)
         {
             ConnectionGroup = connectionGroup;
             (ConnectionGroup as RfcommRXConnectionGroup).BluetoothManager.RfcommScanner.Added += RfcommScanner_Added;
             (ConnectionGroup as RfcommRXConnectionGroup).BluetoothManager.RfcommScanner.Stopped += RfcommScanner_Stopped;
-            Status = RXScannerStatus.Created;
         }
 
         private void RfcommScanner_Stopped(object sender, EventArgs e)
@@ -27,28 +31,28 @@ namespace RemoteX.Connection.Rfcomm
             Status = RXScannerStatus.Stopped;
         }
 
-        private async void RfcommScanner_Added(object sender, Bluetooth.IBluetoothDevice e)
+        private async void RfcommScanner_Added(object sender, IBluetoothDevice e)
         {
-            if(e.Address == BluetoothUtils.AddressStringToInt64("DC:53:60:DD:AE:63"))
+            if(e.Address == TargetMacAddress)
             {
-                //var serviceResult = await e.GetRfcommServicesAsync();
+                Stop();
                 await e.RfcommConnectAsync();
                 //var serviceResult = await e.GetRfcommServicesForIdAsync(Constants.ServiceId);
                 var serviceResult = await e.GetRfcommServicesAsync();
 
                 IRfcommDeviceService service = null;
-                if(serviceResult.Error == BluetoothError.Success && serviceResult.Services.Count > 0)
+                if (serviceResult.Error == BluetoothError.Success && serviceResult.Services.Count > 0)
                 {
-                    foreach(var ser in serviceResult.Services)
+                    foreach (var ser in serviceResult.Services)
                     {
-                        if(ser.ServiceId == Constants.ServiceId)
+                        if (ser.ServiceId == Constants.ServiceId)
                         {
                             service = ser;
                             break;
                         }
                     }
                 }
-                if(service == null)
+                if (service == null)
                 {
                     return;
                 }
@@ -59,10 +63,21 @@ namespace RemoteX.Connection.Rfcomm
 
         public void Start()
         {
-            
-            (ConnectionGroup as RfcommRXConnectionGroup).BluetoothManager.RfcommScanner.Start();
-            Status = RXScannerStatus.Started;
-            
+            Task.Run(async() =>
+            {
+                foreach (var device in ConnectionGroup.ConnectionManager.RXDevices)
+                {
+                    var result = await device.AttributrClient.ReadAsync("Rfcomm.A");
+                    if(result.ReadState == Attribute.AttributeReadState.Successful)
+                    {
+                        var macAddress = BitConverter.ToUInt64(result.Value, 0);
+                        TargetMacAddress = macAddress;
+                        (ConnectionGroup as RfcommRXConnectionGroup).BluetoothManager.RfcommScanner.Start();
+                        break;
+                    }
+
+                };
+            }); 
         }
 
         public void Stop()

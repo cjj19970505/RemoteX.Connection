@@ -18,6 +18,7 @@ namespace RemoteX.Connection
     }
     public interface IRXScanner
     {
+        IRXConnectionGroup ConnectionGroup { get; }
         event EventHandler<IRXConnection> OnConnectionReceived;
         RXScannerStatus Status { get; }
         void Start();

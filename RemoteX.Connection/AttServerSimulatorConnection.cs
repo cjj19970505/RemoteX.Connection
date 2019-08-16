@@ -20,8 +20,9 @@ namespace RemoteX.Connection
 
         public RXDevice RemoteRXDevice { get; set; }
 
-        public AttServerSimulatorConnection(RXDevice remoteDevice)
+        public AttServerSimulatorConnection(RXDevice remoteDevice, IRXConnectionGroup connectionGroup)
         {
+            ConnectionGroup = connectionGroup;
             RemoteRXDevice = remoteDevice;
             Attributes = new Dictionary<string, byte[]>();
             ConnectionState = RXConnectionState.Created;
@@ -32,6 +33,7 @@ namespace RemoteX.Connection
             return Task.Run(() =>
             {
                 ConnectionState = RXConnectionState.Connected;
+                OnConnectionStateChanged?.Invoke(this, ConnectionState);
             });
         }
 
@@ -45,16 +47,17 @@ namespace RemoteX.Connection
 
         protected virtual void OnSend(RXSendMessage sendMsg)
         {
-            var maybeKey = Encoding.UTF8.GetString(sendMsg.Bytes);
+            var maybeReadRequest = AttributeReadRequest.DecodeFromByteArray(sendMsg.Bytes);
             AttributeReadResult readResult = new AttributeReadResult
             {
                 ReadState = AttributeReadState.Error
             };
-            if (Attributes.ContainsKey(maybeKey))
+            if (Attributes.ContainsKey(maybeReadRequest.RequestKey))
             {
-                var value = Attributes[maybeKey];
+                var value = Attributes[maybeReadRequest.RequestKey];
                 readResult = new AttributeReadResult
                 {
+                    RequestGuid = maybeReadRequest.RequestGuid,
                     ReadState = AttributeReadState.Successful,
                     Value = value
                 };
@@ -64,6 +67,7 @@ namespace RemoteX.Connection
             {
                 readResult = new AttributeReadResult
                 {
+                    RequestGuid = maybeReadRequest.RequestGuid,
                     ReadState = AttributeReadState.NonExsited
                 };
             }

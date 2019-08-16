@@ -1,6 +1,7 @@
 ﻿using RemoteX.Bluetooth;
 using RemoteX.Connection;
 using RemoteX.Connection.Rfcomm;
+using RemoteX.RXConnExplorer.Attribute;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,9 +30,19 @@ namespace RemoteX.RXConnExplorer.Views
             BluetoothManager = managerManager.BluetoothManager;
             RXConnectionManager = managerManager.RXConnectionManager;
 
-            RfcommRXConnectionGroup rfcommConnectionGroup = new RfcommRXConnectionGroup(BluetoothManager);
+            LocalConnectionGroup localConnectionGroup = new LocalConnectionGroup(RXConnectionManager);
+            RXConnectionManager.AddConnectionGroup(localConnectionGroup);
+
+            RfcommRXConnectionGroup rfcommConnectionGroup = new RfcommRXConnectionGroup(BluetoothManager, RXConnectionManager);
             RXConnectionManager.AddConnectionGroup(rfcommConnectionGroup);
             RXConnectionManager.OnReceived += RXConnectionManager_OnReceived;
+
+            Dictionary<string, byte[]> pairs = new Dictionary<string, byte[]>();
+            pairs.Add("DeviceName", Encoding.UTF8.GetBytes("MY MACHINE"));
+            pairs.Add("DeviceId", Guid.NewGuid().ToByteArray());
+            pairs.Add("Rfcomm.N", Encoding.UTF8.GetBytes("XEON-J-LAPTOP-1"));
+            pairs.Add("Rfcomm.A", BitConverter.GetBytes(BluetoothUtils.AddressStringToInt64("DC:53:60:DD:AE:63")));
+            (localConnectionGroup.Scanner as LocalConnectionScanner).AddConnection(pairs);
         }
 
         private void RXConnectionManager_OnReceived(object sender, RXReceiveMessage e)
@@ -59,7 +70,12 @@ namespace RemoteX.RXConnExplorer.Views
             {
                 return;
             }
-            await RXConnectionManager.SendAsync(new RXSendMessage { Bytes = Encoding.UTF8.GetBytes(SendEntry.Text) });
+            await RXConnectionManager.SendAsync(new RXSendMessage { ChannelCode=1, Bytes = Encoding.UTF8.GetBytes(SendEntry.Text) });
+        }
+
+        private async void AttDeviceButton_Clicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new AttributeDeviceListPage());
         }
     }
 }

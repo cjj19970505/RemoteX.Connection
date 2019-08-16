@@ -16,9 +16,11 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
+                    <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <Button x:Name="StartAdvertiseButton" Grid.Column="0" Text="Advertise" Clicked="StartAdvertiseButton_Clicked"/>
                 <Button x:Name="StartScanButton" Grid.Column="1" Text="Scan" Clicked="StartScanButton_Clicked"/>
+                <Button x:Name="AttDeviceButton" Grid.Column="2" Text="Attribute" Clicked="AttDeviceButton_Clicked"/>
             </Grid>
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>

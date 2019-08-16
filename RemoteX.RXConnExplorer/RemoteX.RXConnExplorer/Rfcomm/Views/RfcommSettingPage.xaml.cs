@@ -23,7 +23,7 @@ namespace RemoteX.RXConnExplorer.Rfcomm.Views
             IManagerManager managerManager = DependencyService.Get<IManagerManager>();
             BluetoothManager = managerManager.BluetoothManager;
             var rxConnManager = managerManager.RXConnectionManager;
-            RfcommRXConnectionGroup rfcommConnectionGroup = new RfcommRXConnectionGroup(BluetoothManager);
+            RfcommRXConnectionGroup rfcommConnectionGroup = new RfcommRXConnectionGroup(BluetoothManager, rxConnManager);
             rxConnManager.AddConnectionGroup(rfcommConnectionGroup);
         }
 

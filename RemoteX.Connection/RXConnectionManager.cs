@@ -11,6 +11,29 @@ namespace RemoteX.Connection
         List<IRXConnectionGroup> _RXConnectionGroupList;
         List<IRXConnection> _RXConnectionList;
         public event EventHandler<RXReceiveMessage> OnReceived;
+        public RXDevice[] RXDevices
+        {
+            get
+            {
+                var deviceList = new List<RXDevice>();
+                foreach(var connection in _RXConnectionList)
+                {
+                    if(!deviceList.Contains(connection.RemoteRXDevice))
+                    {
+                        deviceList.Add(connection.RemoteRXDevice);
+                    }
+                }
+                return deviceList.ToArray();
+            }
+        }
+
+        public IRXConnection[] Connections
+        {
+            get
+            {
+                return _RXConnectionList.ToArray();
+            }
+        }
         
         public RXConnectionManager()
         {
@@ -29,6 +52,10 @@ namespace RemoteX.Connection
             foreach(var connectionGroup in _RXConnectionGroupList)
             {
                 connectionGroup.Listener.ConnectionReceived += Listener_ConnectionReceived;
+                
+            }
+            foreach(var connectionGroup in _RXConnectionGroupList)
+            {
                 connectionGroup.Listener.Start();
             }
         }
@@ -37,8 +64,11 @@ namespace RemoteX.Connection
         {
             foreach(var connectionGroup in _RXConnectionGroupList)
             {
-                connectionGroup.Scanner.Start();
                 connectionGroup.Scanner.OnConnectionReceived += Scanner_OnConnectionReceived;
+            }
+            foreach(var connectionGroup in _RXConnectionGroupList)
+            {
+                connectionGroup.Scanner.Start();
             }
         }
 
@@ -103,7 +133,21 @@ namespace RemoteX.Connection
                 
                 return null;
             }
-            return preFilteredConnection[0];
+            IRXConnection connection = null;
+            foreach(var conn in preFilteredConnection)
+            {
+                if(conn.ConnectionGroup is LocalConnectionGroup)
+                {
+                    if(message.ChannelCode != 0)
+                    {
+                        continue;
+                    }
+                    
+                }
+                connection = conn;
+                break;
+            }
+            return connection;
         }
     }
 }

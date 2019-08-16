@@ -121,7 +121,7 @@ namespace RemoteX.Connection.Attribute
 
         private void ConnectionManager_OnReceived(object sender, RXReceiveMessage e)
         {
-            if(e.ChannelCode == ATTRIBUTE_CHANNEL_CODE)
+            if(e.RXConnection.RemoteRXDevice == RemoteRXDevice && e.ChannelCode == ATTRIBUTE_CHANNEL_CODE)
             {
                 var response = AttributeReadResult.DecodeFromByteArray(e.Bytes);
                 lock(_WaitingThreadDictLock)
@@ -130,52 +130,57 @@ namespace RemoteX.Connection.Attribute
                     {
                         var bundle = _WaitingThreadDict[response.RequestGuid];
                         bundle.Result = response;
+                        bundle.Thread.Interrupt();
                     }
                 }
             }
         }
 
-        public async Task<AttributeReadResult> ReadAsync(string attributeKey)
+        public Task<AttributeReadResult> ReadAsync(string attributeKey)
         {
-            Guid requestGuid = Guid.NewGuid();
-            AttributeReadRequest readRequest = new AttributeReadRequest
+            return Task.Run(() =>
             {
-                RequestKey = attributeKey,
-                RequestGuid = requestGuid
-            };
-            var sendMsg = new RXSendMessage()
-            {
-                ChannelCode = ATTRIBUTE_CHANNEL_CODE,
-                Bytes = readRequest.EncodeToBytesArray()
-            };
-            await RemoteRXDevice.ConnectionManager.SendAsync(sendMsg);
-            lock(_WaitingThreadDictLock)
-            {
-                _WaitingThreadDict.Add(requestGuid, new ThreadResponseBundle { Thread = Thread.CurrentThread});
-            }
-            AttributeReadResult result;
-            try
-            {
-                Thread.Sleep(SessionTimeOutInMs);
-                result = new AttributeReadResult
+                Guid requestGuid = Guid.NewGuid();
+                AttributeReadRequest readRequest = new AttributeReadRequest
                 {
-                    RequestGuid = requestGuid,
-                    ReadState = AttributeReadState.Error
+                    RequestKey = attributeKey,
+                    RequestGuid = requestGuid
                 };
-            }
-            catch(ThreadInterruptedException)
-            {
-                lock(_WaitingThreadDictLock)
+                var sendMsg = new RXSendMessage()
                 {
-                    result = _WaitingThreadDict[requestGuid].Result;
+                    ChannelCode = ATTRIBUTE_CHANNEL_CODE,
+                    Bytes = readRequest.EncodeToBytesArray()
+                };
+                lock (_WaitingThreadDictLock)
+                {
+                    _WaitingThreadDict.Add(requestGuid, new ThreadResponseBundle { Thread = Thread.CurrentThread });
                 }
-                
-            }
-            finally
-            {
-                _WaitingThreadDict.Remove(requestGuid);
-            }
-            return result;
+                var sendTask = RemoteRXDevice.ConnectionManager.SendAsync(sendMsg);
+                AttributeReadResult result;
+                try
+                {
+                    Thread.Sleep(SessionTimeOutInMs);
+                    result = new AttributeReadResult
+                    {
+                        RequestGuid = requestGuid,
+                        ReadState = AttributeReadState.Error
+                    };
+                }
+                catch (ThreadInterruptedException)
+                {
+                    lock (_WaitingThreadDictLock)
+                    {
+                        result = _WaitingThreadDict[requestGuid].Result;
+                    }
+
+                }
+                finally
+                {
+                    _WaitingThreadDict.Remove(requestGuid);
+                }
+                return result;
+            });
+            
         }
 
         class ThreadResponseBundle

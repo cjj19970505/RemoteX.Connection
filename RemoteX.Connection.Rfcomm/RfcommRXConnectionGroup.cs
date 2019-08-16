@@ -13,12 +13,17 @@ namespace RemoteX.Connection.Rfcomm
 
         public IBluetoothManager BluetoothManager { get; }
 
-        public RfcommRXConnectionGroup(IBluetoothManager bluetoothManager)
+        public RXConnectionManager ConnectionManager { get; }
+
+        public RfcommRXConnectionGroup(IBluetoothManager bluetoothManager, RXConnectionManager connectionManager)
         {
             BluetoothManager = bluetoothManager;
             Listener = new RfcommAdvertiseRXListener(this);
-            Scanner = new RfcommRXScanner(this);
-            
+            //Scanner = new RfcommRXScanner(this);
+            Scanner = new RfcommFromAttRXScanner(this);
+            ConnectionManager = connectionManager;
+
+
         }
     }
 }

@@ -21,7 +21,7 @@ namespace RemoteX.Connection.Rfcomm
         public IRfcommConnection RfcommConnection { get; private set; }
         public IRXConnectionGroup ConnectionGroup { get; }
 
-        public RXDevice RemoteRXDevice => throw new NotImplementedException();
+        public RXDevice RemoteRXDevice { get; }
 
         Task _ReadInputStreamTask;
 
@@ -31,6 +31,7 @@ namespace RemoteX.Connection.Rfcomm
         /// <param name="deviceService"></param>
         internal RfcommRXConnection(IRfcommDeviceService deviceService, IRXConnectionGroup connectionGroup)
         {
+            
             DeviceService = deviceService;
             ConnectionState = RXConnectionState.Created;
             ConnectionGroup = connectionGroup;

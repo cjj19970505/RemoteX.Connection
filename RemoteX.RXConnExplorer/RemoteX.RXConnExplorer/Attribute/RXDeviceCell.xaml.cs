@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace RemoteX.RXConnExplorer.Views
+namespace RemoteX.RXConnExplorer.Attribute
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class RXAttClientPage : ContentView
+    public partial class RXDeviceCell : ViewCell
     {
-        public RXAttClientPage()
+        public RXDeviceCell()
         {
             InitializeComponent();
         }

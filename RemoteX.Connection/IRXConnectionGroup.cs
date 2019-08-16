@@ -6,6 +6,7 @@ namespace RemoteX.Connection
 {
     public interface IRXConnectionGroup
     {
+        RXConnectionManager ConnectionManager { get; }
         IRXListener Listener { get; }
         IRXScanner Scanner { get; }
     }
