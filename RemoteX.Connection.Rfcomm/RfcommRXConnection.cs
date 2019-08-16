@@ -19,6 +19,9 @@ namespace RemoteX.Connection.Rfcomm
         /// If the host is server, ServiceProvider indicates the Rfcomm Service on the server(Remote Device)
         /// </summary>
         public IRfcommConnection RfcommConnection { get; private set; }
+        public IRXConnectionGroup ConnectionGroup { get; }
+
+        public RXDevice RemoteRXDevice => throw new NotImplementedException();
 
         Task _ReadInputStreamTask;
 
@@ -26,25 +29,27 @@ namespace RemoteX.Connection.Rfcomm
         /// 这个构造器是Client用的
         /// </summary>
         /// <param name="deviceService"></param>
-        internal RfcommRXConnection(IRfcommDeviceService deviceService)
+        internal RfcommRXConnection(IRfcommDeviceService deviceService, IRXConnectionGroup connectionGroup)
         {
             DeviceService = deviceService;
             ConnectionState = RXConnectionState.Created;
+            ConnectionGroup = connectionGroup;
         }
-        
+
         /// <summary>
         /// 这个构造器是Server用的
         /// Server接收到连接后就是连上了，所以server直接调用一个Connect就可以连接上
         /// </summary>
         /// <param name="rfcommConnection"></param>
-        internal RfcommRXConnection(IRfcommConnection rfcommConnection)
+        internal RfcommRXConnection(IRfcommConnection rfcommConnection, IRXConnectionGroup connectionGroup)
         {
             RfcommConnection = rfcommConnection;
             ConnectionState = RXConnectionState.Created;
+            ConnectionGroup = connectionGroup;
         }
 
         public event EventHandler<RXConnectionState> OnConnectionStateChanged;
-        public event EventHandler<RXMessage> OnReceived;
+        public event EventHandler<RXReceiveMessage> OnReceived;
 
         public async Task ConnectAsync()
         {
@@ -82,30 +87,43 @@ namespace RemoteX.Connection.Rfcomm
         {
             return Task.Run(() =>
             {
-                
+
                 var inputStream = RfcommConnection.InputStream;
+                bool disconnected = false;
                 while (true)
                 {
                     byte[] buffer = new byte[255];
-                    try
+                    var readSize = inputStream.Read(buffer, 0, buffer.Length);
+                    if (readSize == 0)
                     {
-                        var readSize = inputStream.Read(buffer, 0, buffer.Length);
-                        var readBytes = new byte[readSize];
-                        Array.Copy(buffer, 0, readBytes, 0, readSize);
-                        var msg = new RXMessage { Bytes = readBytes };
-                        OnReceived?.Invoke(this, msg);
+                        disconnected = true;
+                        break;
                     }
-                    catch(Exception e)
+                    var readBytes = new byte[readSize];
+                    Array.Copy(buffer, 0, readBytes, 0, readSize);
+                    var msg = new RXReceiveMessage
                     {
-                        System.Diagnostics.Debug.WriteLine("fuck");
-                    }
+                        RXConnection = this,
+                        Bytes = readBytes
+                    };
+                    OnReceived?.Invoke(this, msg);
+                }
+                if (disconnected)
+                {
+                    RfcommConnection.Dispose();
+                    ConnectionState = RXConnectionState.Destoryed;
+                    OnConnectionStateChanged?.Invoke(this, ConnectionState);
                 }
             });
         }
 
-        public async Task SendAsync(byte[] sendBytes)
+        public async Task SendAsync(RXSendMessage sendMsg)
         {
-            await RfcommConnection.OutputStream.WriteAsync(sendBytes, 0, sendBytes.Length);
+            var sendByteList = new List<byte>();
+            sendByteList.AddRange(BitConverter.GetBytes(sendMsg.ChannelCode));
+            sendByteList.AddRange(sendMsg.Bytes);
+
+            await RfcommConnection.OutputStream.WriteAsync(sendByteList.ToArray(), 0, sendByteList.Count);
             await RfcommConnection.OutputStream.FlushAsync();
         }
     }

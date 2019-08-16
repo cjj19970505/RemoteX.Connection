@@ -14,9 +14,12 @@ namespace RemoteX.Connection
         /// STATE:Connecting-->STATE:Connected/Destoryed
         /// </summary>
         RXConnectionState ConnectionState { get; }
+        RXDevice RemoteRXDevice { get; }
+        IRXConnectionGroup ConnectionGroup { get; }
         event EventHandler<RXConnectionState> OnConnectionStateChanged;
-        event EventHandler<RXMessage> OnReceived;
-        Task SendAsync(byte[] sendBytes);
+        event EventHandler<RXReceiveMessage> OnReceived;
+
+        Task SendAsync(RXSendMessage sendMsg);
         Task ConnectAsync();
     }
 

@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RemoteX.Bluetooth" Version="1.0.2" />
+    <PackageReference Include="RemoteX.Bluetooth" Version="1.0.3" />
     <PackageReference Include="Xamarin.Forms" Version="4.1.0.673156" />  
     <PackageReference Include="Xamarin.Essentials" Version="1.2.0" />
   </ItemGroup>
@@ -21,7 +21,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Attribute\AttClientPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Attribute\ClientAttPair.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Rfcomm\Views\RfcommSettingPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\RXAttClientPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\RXConnPage.xaml">

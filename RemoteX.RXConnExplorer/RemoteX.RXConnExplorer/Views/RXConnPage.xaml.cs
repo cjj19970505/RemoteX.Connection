@@ -34,13 +34,13 @@ namespace RemoteX.RXConnExplorer.Views
             RXConnectionManager.OnReceived += RXConnectionManager_OnReceived;
         }
 
-        private void RXConnectionManager_OnReceived(object sender, RXMessage e)
+        private void RXConnectionManager_OnReceived(object sender, RXReceiveMessage e)
         {
             Device.BeginInvokeOnMainThread(() =>
             {
                 ReceiveMessageList.Add(Encoding.UTF8.GetString(e.Bytes));
             });
-            
+
         }
 
         private void StartAdvertiseButton_Clicked(object sender, EventArgs e)
@@ -55,11 +55,11 @@ namespace RemoteX.RXConnExplorer.Views
 
         private async void SendButton_Clicked(object sender, EventArgs e)
         {
-           if(SendEntry.Text == null)
+            if (SendEntry.Text == null)
             {
                 return;
             }
-            await RXConnectionManager.SendAsync(new RXMessage { Bytes = Encoding.UTF8.GetBytes(SendEntry.Text) });
+            await RXConnectionManager.SendAsync(new RXSendMessage { Bytes = Encoding.UTF8.GetBytes(SendEntry.Text) });
         }
     }
 }

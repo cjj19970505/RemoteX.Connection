@@ -34,7 +34,7 @@ namespace RemoteX.Connection.Rfcomm
 
         private void ServiceProvier_OnConnectionReceived(object sender, IRfcommConnection e)
         {
-            RfcommRXConnection rxConnection = new RfcommRXConnection(e);
+            RfcommRXConnection rxConnection = new RfcommRXConnection(e, ConnectionGroup);
             ConnectionReceived?.Invoke(this, rxConnection);
         }
     }

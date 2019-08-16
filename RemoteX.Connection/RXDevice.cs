@@ -6,12 +6,17 @@ namespace RemoteX.Connection
 {
     public class RXDevice
     {
+        
         public string DeviceName { get; internal set; }
-        public string DeviceId { get; internal set; }
+        public Guid DeviceId { get; internal set; }
 
-        internal RXDevice(string deviceName, string deviceId)
+        public RXConnectionManager ConnectionManager { get; }
+
+        public RXDevice(RXConnectionManager rxConnectionManager, string deviceName, Guid deviceId)
         {
-            
+            ConnectionManager = rxConnectionManager;
+            DeviceName = deviceName;
+            DeviceId = deviceId;
         }
     }
 }

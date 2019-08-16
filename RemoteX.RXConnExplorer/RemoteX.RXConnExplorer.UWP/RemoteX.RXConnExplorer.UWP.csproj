@@ -150,10 +150,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="RemoteX.Bluetooth">
-      <Version>1.0.2</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="RemoteX.Bluetooth.Win10">
-      <Version>1.0.2</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="4.1.0.673156" />
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.8" />

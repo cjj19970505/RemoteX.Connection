@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:rxconnexplorer="clr-namespace:RemoteX.RXConnExplorer"
              mc:Ignorable="d"
              x:Class="RemoteX.RXConnExplorer.App">
 
@@ -15,6 +16,7 @@
                 <Setter Property="BarTextColor" Value="White" />
             </Style>
         </ResourceDictionary>
+        <rxconnexplorer:GuidToStringConverter x:Key="GuidToStringConverter"/>
     </Application.Resources>
     
 </Application>

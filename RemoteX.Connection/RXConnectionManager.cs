@@ -7,12 +7,14 @@ namespace RemoteX.Connection
 {
     public class RXConnectionManager
     {
+        public RXDevice LocalRXDevice { get; }
         List<IRXConnectionGroup> _RXConnectionGroupList;
         List<IRXConnection> _RXConnectionList;
-        public event EventHandler<RXMessage> OnReceived;
+        public event EventHandler<RXReceiveMessage> OnReceived;
         
         public RXConnectionManager()
         {
+            LocalRXDevice = new RXDevice(this, Environment.MachineName, Guid.NewGuid());
             _RXConnectionGroupList = new List<IRXConnectionGroup>();
             _RXConnectionList = new List<IRXConnection>();
         }
@@ -59,23 +61,49 @@ namespace RemoteX.Connection
 
         private void Connection_OnConnectionStateChanged(object sender, RXConnectionState e)
         {
-            
+            var connection = sender as IRXConnection;
+            if(e == RXConnectionState.Destoryed)
+            {
+                _RXConnectionList.Remove(connection);
+                var connectionGroup = connection.ConnectionGroup;
+                if(connectionGroup.Scanner.Status == RXScannerStatus.Aborted || connectionGroup.Scanner.Status == RXScannerStatus.Stopped)
+                {
+                    connectionGroup.Scanner.Start();
+                }
+            }
         }
 
         
-        private void Connection_OnReceived(object sender, RXMessage e)
+        private void Connection_OnReceived(object sender, RXReceiveMessage e)
         {
             OnReceived?.Invoke(this, e);
         }
-        public async Task SendAsync(RXMessage rxMessage)
+        public async Task SendAsync(RXSendMessage rxMessage)
         {
-            var rxConnection = _SelectConnection(rxMessage);
-            await rxConnection.SendAsync(rxMessage.Bytes);
+            var rxConnection = _SelectConnection(_RXConnectionList.ToArray(), rxMessage);
+            if(rxConnection == null)
+            {
+                System.Diagnostics.Debug.WriteLine("NO CONNECTION, SEND SHIT");
+            }
+            else
+            {
+                await rxConnection.SendAsync(rxMessage);
+            }
         }
 
-        public IRXConnection _SelectConnection(RXMessage message)
+        public async Task SendAsync(RXDevice rxDevice, RXSendMessage rxMessage)
         {
-            return _RXConnectionList[0];
+            
+        }
+
+        public IRXConnection _SelectConnection(IRXConnection[] preFilteredConnection, RXSendMessage message)
+        {
+            if(preFilteredConnection.Length == 0)
+            {
+                
+                return null;
+            }
+            return preFilteredConnection[0];
         }
     }
 }
